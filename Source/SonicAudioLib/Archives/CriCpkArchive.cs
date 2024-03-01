@@ -563,6 +563,38 @@ namespace SonicAudioLib.Archives
             vldPool.Write(destination);
         }
 
+        public byte[] GetFileByName(FileStream fs, string name)
+        {
+            var entry = GetByName(name);
+
+            return GetFile(fs, entry);
+        }
+
+        public byte[] GetFileById(FileStream fs, uint id)
+        {
+            var entry = GetById(id);
+
+            return GetFile(fs, entry);
+        }
+
+        private static byte[] GetFile(FileStream fs, CriCpkEntry entry)
+        {
+            byte[] bytes = new byte[entry.Length];
+            fs.Read(bytes, (int)entry.Position, (int)entry.Length);
+            byte[] outBytes = new byte[entry.UncompressedLength];
+
+            if (entry.IsCompressed)
+            {
+                Decompress(bytes, outBytes);
+            }
+            else
+            {
+                outBytes = bytes;
+            }
+
+            return outBytes;
+        }
+
         public CriCpkEntry GetById(uint id)
         {
             return entries.FirstOrDefault(entry => (entry.Id == id));
